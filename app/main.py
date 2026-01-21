@@ -17,3 +17,11 @@ def root():
 def get_kpis():
     df = pd.read_sql("suppliers_kpis", engine)
     return df.to_dict(orient="records")
+
+@app.get("/suppliers/ranking")
+def get_ranking():
+    df = pd.read_sql(
+        "SELECT ranking, name, score, status FROM suppliers_kpis",
+        engine
+    )
+    return df.to_dict(orient="records")

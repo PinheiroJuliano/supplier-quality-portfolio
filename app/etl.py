@@ -27,11 +27,25 @@ def run():
         + (100 - kpis["non_conformity_pct"]) * 0.4
     )
 
-    final_df = kpis.merge(
-        df_users, left_on="userId", right_on="id"
-    )[
-        ["name", "orders", "delivery_on_time_pct", "non_conformity_pct", "score"]
-    ]
+    def classify(score):
+        if score >= 85:
+            return "A"
+        elif score >= 70:
+            return "B"
+        else:
+            return "C"
+
+    kpis["status"] = kpis["score"].apply(classify)
+
+    final_df = (
+        kpis.merge(df_users, left_on="userId", right_on="id")
+        [["name", "orders", "delivery_on_time_pct",
+          "non_conformity_pct", "score", "status"]]
+        .sort_values(by="score", ascending=False)
+        .reset_index(drop=True)
+    )
+
+    final_df["ranking"] = final_df.index + 1
 
     final_df.to_sql(
         "suppliers_kpis",
